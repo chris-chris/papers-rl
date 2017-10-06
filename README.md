@@ -1,3 +1,6 @@
-# My Awesome Book
+## 강화학습 논문 정리
 
-This file file serves as your book's preface, a great place to describe your book's content and ideas.
+논문을 한글로 번역
+
+
+
