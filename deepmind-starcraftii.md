@@ -1,3 +1,9 @@
+# 스타크래프트 II : 강화학습의 새로운 챌린지
+### StarCraft II : New Challenge for Reinforcement Learning
+
+Oriol Vinyals Timo Ewalds Sergey Bartunov Petko Georgiev Alexander Sasha Vezhnevets Michelle Yeo Alireza Makhzani John Agapiou Julian Schrittwieser Stephen GaffneyKaren Simonyan Tom Schaul Hado van Hasselt David SilverDeepMind
+Heinrich Ku ̈ttler Stig PetersenTimothy LillicrapKevin Calderone Paul Keet Anthony Brunasso David Lawrence Anders Ekermo Jacob Repp Rodney TsingBlizzard
+
 [\#deepmind](http://openresearch.ai/tags/deepmind)와 블리자드가 함께 pysc2라는 스타크래프트2 환경을 제공하면서 발표한 논문입니다.
 
 * pysc2라는 스타크래프트2 python 환경 제공
