@@ -1,7 +1,7 @@
 # Summary
 
 * [Introduction](README.md)
-* [RL-Nash Equilibrium](chapter1.md)
+* [CMU-Nash Equilibrium](chapter1.md)
 * [Deepmind-StarCraftII](deepmind-starcraftii.md)
 * [Toronto-ACKTR](toronto-acktr.md)
 * [Toronto-K-FAC](toronto-k-fac.md)
