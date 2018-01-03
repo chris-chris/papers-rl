@@ -111,28 +111,29 @@ The λ parameters control the weighting between the losses. We examine removing 
 Once the pre-training phase is complete, the agent starts acting on the system, collecting self-generated data, and adding it to its replay buffer Dreplay. Data is added to the replay buffer until it is full, and then the agent starts overwriting old data in that buffer. However, the agent never over-writes the demonstration data. For proportional prioritized sampling, different small positive constants, ǫa and ǫd, are added to the priorities of the agent and demonstration transitions to control the relative sampling of demonstration versus agent data. All the losses are applied to the demonstration data in both phases, while the supervised loss is not applied to self-generated data (λ2 = 0).
 Overall, Deep Q-learning from Demonstration (DQfD) differs from PDD DQN in six key ways:
 
-• 데모 데이터 : DQf 데모
+- 데모 데이터 : DQf 데모
 데이터는 재생 버퍼에 영구히 보관됩니다.
-• 사전 교육 (Pre-training) : DQfD는 초기에 환경 데이터와의 상호 작용을 시작하기 전에 악마 데이터에 대해 전적으로 훈련한다.
+- 사전 교육 (Pre-training) : DQfD는 초기에 환경 데이터와의 상호 작용을 시작하기 전에 악마 데이터에 대해 전적으로 훈련한다.
 범위.
-• 감독 손실 : TD 손실 외에도,
+- 감독 손실 : TD 손실 외에도,
 Demonstrator의 행동 가치를 다른 행동 가치 (Piot, Geist 및 Pietquin 2014a)보다 높게 설정하는 Gin 감독 손실이 적용됩니다.
-• L2 정규화 손실 :이 알고리즘은 데모 데이터에 대한 과도한 피팅을 방지하기 위해 네트워크 가중치에 L2 정규화 손실을 추가합니다.
-• N-step TD 손실 : 에이전트는 1 단계 및 n 단계 반환의 조합을 통해 목표로 Q-network을 업데이트합니다.
-• 데모 우선 순위 보너스 : 데몬스트레이션 전환의 우선 순위에는 샘플링되는 빈도를 높이기 위해 ǫd 보너스가 주어집니다.
+- L2 정규화 손실 :이 알고리즘은 데모 데이터에 대한 과도한 피팅을 방지하기 위해 네트워크 가중치에 L2 정규화 손실을 추가합니다.
+- N-step TD 손실 : 에이전트는 1 단계 및 n 단계 반환의 조합을 통해 목표로 Q-network을 업데이트합니다.
+- 데모 우선 순위 보너스 : 데몬스트레이션 전환의 우선 순위에는 샘플링되는 빈도를 높이기 위해 ǫd 보너스가 주어집니다.
 
-• Demonstration data: DQfDisgivenasetofdemonstration
+```text
+- Demonstration data: DQfDisgivenasetofdemonstration
 data, which it retains in its replay buffer permanently.
-• Pre-training: DQfD initially trains solely on the demon- stration data before starting any interaction with the envi-
+- Pre-training: DQfD initially trains solely on the demonstration data before starting any interaction with the envi-
 ronment.
-• Supervised losses: In addition to TD losses, a large mar-
-gin supervised loss is applied that pushes the value of the demonstrator’s actions above the other action val- ues (Piot, Geist, and Pietquin 2014a).
-• L2 Regularization losses: The algorithm also adds L2 reg- ularization losses on the network weights to prevent over- fitting on the demonstration data.
-• N-step TD losses: The agent updates its Q-network with targets from a mix of 1-step and n-step returns.
-• Demonstration priority bonus: The priorities of demon- stration transitions are given a bonus of ǫd, to boost the frequency that they are sampled.
-
-![alt text](images/dqfd1.png) 
-
+- Supervised losses: In addition to TD losses, a large margin supervised loss is applied that pushes the value of the demonstrator’s actions above the other action val- ues (Piot, Geist, and Pietquin 2014a).
+- L2 Regularization losses: The algorithm also adds L2 reg- ularization losses on the network weights to prevent over- fitting on the demonstration data.
+- N-step TD losses: The agent updates its Q-network with targets from a mix of 1-step and n-step returns.
+- Demonstration priority bonus: The priorities of demon- stration transitions are given a bonus of ǫd, to boost the frequency that they are sampled.
 ```
+
+![alt text](images/dqfd1.png)
+
+```python
 
 ```
