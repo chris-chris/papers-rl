@@ -30,6 +30,8 @@ We propose a new deep reinforcement learning algorithm, Deep Q-learning from Dem
 
 이 전이에 대해 계산 된 마지막 TD 오차 및 ǫ는 모든 전이가 일부 확률로 샘플링되도록하는 작은 양의 상수이다. 분포의 변화를 고려하기 위해 네트워크 업데이트는 중요도 샘플링 가중치 w = (1 · 1) β로 가중치가 부여됩니다. 여기서 NP는 재생 버퍼이며 β는 중요도가없는 중요도 샘플링 양을 제어합니다 β = 0 인 경우 샘플링하고 β = 1 인 경우 전체 중요도 샘플링을 수행합니다. β는 β0에서 1까지 선형으로 어닐링됩니다.
 
+```text
+
 We adopt the standard Markov Decision Process (MDP) formalism for this work (Sutton and Barto 1998). An MDP is defined by a tuple ⟨S,A,R,T,γ⟩, which consists of a set of states S, a set of actions A, a reward function R(s, a), a transition function T(s,a,s′) = P(s′|s,a), and a discount factor γ. In each state s ∈ S, the agent takes an action a ∈ A. Upon taking this action, the agent receives a reward R(s, a) and reaches a new state s′, determined from the probability distribution P(s′|s,a). A policy π specifies for each state which action the agent will take. The goal of the agent is to find the policy π mapping states to actions that maximizes the expected discounted total reward over the agent’s lifetime. The value Qπ (s, a) of a given state-action pair (s, a) is an estimate of the expected future reward that can be obtained from (s,a) when following policy π. The optimal value function Q∗(s, a) provides maximal values in all states and is determined by solving the Bellman equation:
 
 The optimal policy π is then π(s) = argmaxa∈A Q∗(s, a). DQN (Mnih et al. 2015) approximates the value function Q(s, a) with a deep neural network that outputs a set of action values Q(s, ·; θ) for a given state input s, where θ are the parameters of the network. There are two key components of DQN that make this work. First, it uses a separate target network that is copied every τ steps from the regular network so that the target Q-values are more stable. Second, the agent adds all of its experiences to a replay buffer Dreplay , which is then sampled uniformly to perform updates on the network.
@@ -37,6 +39,7 @@ The optimal policy π is then π(s) = argmaxa∈A Q∗(s, a). DQN (Mnih et al. 2
 The double Q-learning up-date (van Hasselt, Guez, and Silver 2016) uses the current network to calculate the argmax over next state values and the target network for the value of that action. The double DQN loss is J (Q) =  R(s,a)+γQ(s ,amax;θ′)−Q(s,a;θ) 2, DQ t+1 t+1 where θ′ are the parameters of the target network, and amax = argmax Q(s , a; θ). Separating the value t+1 a t+1 functions used for these two variables reduces the upward bias that is created with regular Q-learning updates. Prioritized experience replay (Schaul et al. 2016) modifies the DQN agent to sample more important transitions from its replay buffer more frequently. The probability of sampling a particular transition i is proportional to its priority, P(i)=   i α ,wheretheprioritypi =|δi|+ǫ,andδi is k pk Q∗(s, a) = E  R(s, a) + γ   P (s′|s, a) max Q∗(s′, a′). 
 
 the last TD error calculated for this transition and ǫ is a small positive constant to ensure all transitions are sampled with some probability. To account for the change in the distribution, updates to the network are weighted with importance sampling weights, w =(1 · 1 )β,whereN isthesizeof i NP(i) the replay buffer and β controls the amount of importance sampling with no importance sampling when β = 0 and full importance sampling when β = 1. β is annealed linearly from β0 to 1.
+```
 
 모방 학습은 주로 Demonstrator의 성과를 맞추는 것과 관련이 있습니다. 한 가지 인기있는 알고리즘 인 DAGGER (Ross, Gordon 및 Bagnell 2011)는 원래 상태 공간 외부의 전문가 정책을 폴링하여 새로운 정책을 반복적으로 생성하여 온라인 학습 관점에서 유효성 검사 데이터에 대해 후회하지 않습니다. DAGGER는 훈련 중에 상담원에게 추가적인 피드백을 제공 할 수 있도록 전문가의 도움을 필요로합니다. 또한, 모방과 보강 학습을 결합하지 않기 때문에 DQfD가 할 수있는 것처럼 전문가 이상의 수준으로 향상시키는 법을 배울 수는 없습니다.
 
@@ -46,20 +49,24 @@ Deep AggreVaTeD (Sun 외 2017)는 DAGGER를 확장하여 심층 신경 네트워
 
 최근 RL (Subramanian, Jr. 및 Thomaz 2016)의 어려운 Exploration 문제를 돕기위한 데모 데이터가 나와 있습니다. 이 결합 된 모조 및 RL 문제에 대한 최근의 관심이 또한있었습니다. 예를 들어, HAT 알고리즘은 인간 정책 (Taylor, Suay 및 Chernova 2011)에서 직접 지식을 전송합니다. 이 연구의 후속 조치는 RL 문제 (Brys 외 2015; Suay 외 2016)에서 보상을 형성하기 위해 전문가의 조언이나 시연을 어떻게 사용할 수 있는지를 보여 주었다.
 
+```text
 Imitation learning is primarily concerned with matching the performance of the demonstrator. One popular algorithm, DAGGER (Ross, Gordon, and Bagnell 2011), iteratively produces new policies based on polling the expert policy outside its original state space, showing that this leads to no-regret over validation data in the online learning sense. DAGGER requires the expert to be available during training to provide additional feedback to the agent. In addition, it does not combine imitation with reinforcement learning, meaning it can never learn to improve beyond the expert as DQfD can.
 
 Deeply AggreVaTeD (Sun et al. 2017) extends DAGGER to work with deep neural networks and continuous action spaces. Not only does it require an always available expert like DAGGER does, the expert must provide a value function in addition to actions. Similar to DAGGER, Deeply AggreVaTeD only does imitation learning and cannot learn to improve upon the expert.
 Another popular paradigm is to setup a zero-sum game where the learner chooses a policy and the adversary chooses a reward function (Syed and Schapire 2007; Syed, Bowling, and Schapire 2008; Ho and Ermon 2016). Demonstrations have also been used for inverse optimal control in high-dimensional, continuous robotic control problems (Finn, Levine, and Abbeel 2016). However, these approaches only do imitation learning and do not allow for learning from task rewards.
 
 Recently, demonstration data has been shown to help in difficult exploration problems in RL (Subramanian, Jr., and Thomaz 2016). There has also been recent interest in this combined imitation and RL problem. For example, the HAT algorithm transfers knowledge directly from human policies (Taylor, Suay, and Chernova 2011). Follow-ups to this work showed how expert advice or demonstrations can be used to shape rewards in the RL problem (Brys et al. 2015; Suay et al. 2016).
+```
 
 다른 접근법은 경험을 샘플링하는 데 사용되는 정책을 형성하거나 (Cederborg 외 2015), 데모 Chemali 및 Lezaric 2015에서 정책 반복을 사용하는 것입니다.
 
 우리 알고리즘은 Demonstrator가 사용하는 환경에서 보상을 받는 시나리오에서 작동합니다. 이 프레임 워크는 적절하게 (Piot, Geist, Pietquin 2014a)의 RLED (Reinforcement Learning with Expert Demonstrations)라고도하며 (Kim et al., 2013, Chemali and Lezaric 2015) 평가됩니다. 우리의 설정은 모형없는 설정에서 배치 알고리즘에서 TD와 분류 손실을 결합한다는 점에서 (Piot, Geist 및 Pietquin 2014a)와 유사합니다. 우리의 에이전트는 초기에 데모 데이터에 대한 사전 교육을 받았으며 자체 생성 데이터 배치가 시간이 지남에 따라 증가하고 깊은 Q 네트워크를 교육하기위한 경험 재생으로 사용된다는 점이 다릅니다. 또한, 각 미니 배치에서 데모 데이터의 양을 균형을 맞추기 위해 우선 순위가 지정된 재생 메커니즘이 사용됩니다. (Piot, Geist 및 Pietquin 2014b)는 감독 된 분류 손실에 TD 손실을 추가하면 보상이없는 경우에도 모방 학습이 향상된다는 흥미로운 결과가 나타납니다.
 
+```text
 A different approach is to shape the policy that is used to sample experience (Cederborg et al. 2015), or to use policy iteration from demonstrations Chemali and Lezaric 2015).
 
 Our algorithm works in a scenario where rewards are given by the environment used by the demonstrator. This framework was appropriately called Reinforcement Learning with Expert Demonstrations (RLED) in (Piot, Geist, and Pietquin 2014a) and is also evaluated in (Kim et al. 2013; Chemali and Lezaric 2015). Our setup is similar to (Piot, Geist, and Pietquin 2014a) in that we combine TD and classification losses in a batch algorithm in a model-free setting; ours differs in that our agent is pre-trained on the demonstration data initially and the batch of self-generated data grows over time and is used as experience replay to train deep Q-networks. In addition, a prioritized replay mechanism is used to balance the amount of demonstration data in each mini-batch. (Piot, Geist, and Pietquin 2014b) present interesting results showing that adding a TD loss to the supervised classification loss improves imitation learning even when there are no rewards.
+```
 
 우리와 비슷한 동기가되는 또 다른 연구가 있습니다 (Schaal 1996). 이 작업은 로봇에 대한 실제 학습에 중점을두고 있으며 따라서 온라인 성능에도 관심이 있습니다. 우리의 작업과 마찬가지로 에이전트는 작업과 상호 작용하기 전에 데모 데이터로 에이전트를 사전 훈련합니다. 그러나 감독 된 학습을 사용하여 알고리즘을 사전 교육하지 않으며 사전 훈련이 장바구니에서 학습하는 데 도움이되는 사례를 하나만 찾을 수 있습니다.
 
@@ -70,6 +77,7 @@ Human Experience Replay (HER) (Hosu and Rebedea 2016)는 에이전트와 데모 
 
 우리와 가장 밀접하게 관련된 연구는 ADET (Accelerated DQN with Expert Trajectories) (Lakshminarayanan, Ozair 및 Bengio 2016)를 제시하는 워크숍 논문입니다. 또한 심층 Q- 학습 설정에서 TD와 분류 손실을 결합합니다. 그들은 훈련 된 DQN 에이전트를 사용하여 대부분의 게임에서 인간 데이터보다 나은 데모 데이터를 생성합니다. 또한 Demonstrator가 사용하는 정책을 도제 에이전트가 동일한 상태 입력 및 네트워크 아키텍처를 사용하므로 표현할 수 있습니다. 그들은 DQfD가 사용하는 큰 마진 손실보다는 크로스 엔트로피 분류 손실을 사용하며 환경과의 첫 번째 상호 작용에서 잘 수행되도록 에이전트를 사전 훈련하지 않습니다.
 
+```text
 Another work that is similarly motivated to ours is (Schaal 1996). This work is focused on real world learning on robots, and thus is also concerned with on-line performance. Similar to our work, they pre-train the agent with demonstration data before letting it interact with the task. However, they do not use supervised learning to pre-train their algorithm, and are only able to find one case where pre-training helps learning on Cart-Pole.
 In one-shot imitation learning (Duanetal.2017), the agent is provided with an entire demonstration as input in addition to the current state. The demonstration specifies the goal state that is wanted, but from different initial conditions. The agent is trained with target actions from more demonstrations. This setup also uses demonstrations, but requires a distribution of tasks with different initial conditions and goal states, and the agent can never learn to improve upon the demonstrations.
 
@@ -78,28 +86,35 @@ AlphaGo (Silver et al. 2016) takes a similar approach to our work in pre-trainin
 Human Experience Replay (HER) (Hosu and Rebedea 2016) is an algorithm in which the agent samples from a replay buffer that is mixed between agent and demonstration data, similar to our approach. Gains were only slightly better than a random agent, and were surpassed by their alternative approach, Human Checkpoint Replay, which requires the ability to set the state of the environment. While their algorithm is similar in that it samples from both datasets, it does not pre-train the agent or use a supervised loss. Our results show higher scores over a larger variety of games, without requiring full access to the environment. Replay Buffer Spiking (RBS) (Lipton et al. 2016) is another similar approach where the DQN agent’s replay buffer is initialized with demonstration data, but they do not pre-train the agent for good initial performance or keep the demonstration data permanently.
 
 The work that most closely relates to ours is a workshop paper presenting Accelerated DQN with Expert Trajectories (ADET) (Lakshminarayanan, Ozair, and Bengio 2016). They are also combining TD and classification losses in a deep Q-learning setup. They use a trained DQN agent to generate their demonstration data, which on most games is better than human data. It also guarantees that the policy used by the demonstrator can be represented by the apprenticeship agent as they are both using the same state input and network architecture. They use a cross-entropy classification loss rather than the large margin loss DQfD uses and they do not pre-train the agent to perform well from its first interactions with the environment.
+```
 
 ## Deep Q-Learning from Demonstrations
 
 많은 실제 환경에서 보강 학습의 경우 이전 컨트롤러가 작동하는 시스템의 데이터에 액세스 할 수 있지만 시스템의 정확한 시뮬레이터에 액세스 할 수는 없습니다. 그러므로 에이전트는 실제 시스템을 실행하기 전에 데모 데이터에서 가능한 한 많이 배우기를 원합니다. 사전 교육 단계의 목표는 에이전트가 환경과 상호 작용을 시작하면이 상향 TD 업데이트와 함께 일 할 수 있도록 벨맨 방정식을 만족하는 함수의 값과 Demonstration을 모방하는 법을 배워야하는 것입니다. 이 미리 트레이닝 단계 동안, 제 샘플 시연 데이터로부터 미니 일괄와 위쪽 네 손실을 적용하여 네트워크를 기간 : 1 단계 이중 Q 학습 손실의 n 단계 이중 Q 학습 손실하는 슈퍼 큰 마진 분류 손실 및 네트워크 가중치 및 바이어스에 대한 L2 정규화 손실을 고려해야합니다. 감시 된 손실은 시연자의 행동 분류에 사용되며, Q학습 손실은 네트워크가 Bellman 방정식을 만족시키고 TD 학습을위한 출발점으로 사용될 수 있음을 보장합니다.
 감독 된 손실은 사전 훈련이 어떤 영향을 미치기 위해 중요합니다. 데모 데이터는 반드시 상태 공간의 좁은 부분을 다루고 모든 가능한 행동을 취하지 않기 때문에 많은 상태 행동이 결코 취해지지 않았고 현실적인 가치에 근거 할 수있는 어떠한 데이터도 가지고 있지 않다. 우리는 다음 상태의 최대 값으로 만 Q-학습 업데이트로 네트워크를 사전 훈련을한다면, 네트워크는 이러한 접지 변수의 가장으로 업데이트 할 것이며,이 값을 전파 할 네트워크는 Q 기능을 전역 개 . 우리는 큰 마진 분류 손실 (Piot, Geist 및 Pietquin 2014a)을 추가합니다.
 
+```text
 In many real-world settings of reinforcement learning, we have access to data of the system being operated by its previous controller, but we do not have access to an accurate simulator of the system. Therefore, we want the agent to learn as much as possible from the demonstration data before running on the real system. The goal of the pre-training phase is to learn to imitate the demonstrator with a value function that satisfies the Bellman equation so that it can be updated with TD updates once the agent starts interacting with the environment. During this pre-training phase, the agent samples mini-batches from the demonstration data and updates the network by applying four losses: the 1-step double Q-learning loss, an n-step double Q-learning loss, a supervised large margin classification loss, and an L2 regularization loss on the network weights and biases. The supervised loss is used for classification of the demonstrator’s actions, while the Q-learning loss ensures that the network satisfies the Bellman equation and can be used as a starting point for TD learning.
 The supervised loss is critical for the pre-training to have any effect. Since the demonstration data is necessarily covering a narrow part of the state space and not taking all possible actions, many state-actions have never been taken and have no data to ground them to realistic values. If we were to pre-train the network with only Q-learning updates towards the max value of the next state, the network would update towards the highest of these ungrounded variables and the network would propagate these values throughout the Q function. We add a large margin classification loss (Piot, Geist, and Pietquin 2014a):
+```
 
 여기서 aE는 전문가 Demonstrator가 상태에서 취한 행동이고 l (aE, a)는 a = aE 일 때 0이고 그렇지 않으면 양수인 마진 기능이다. 이 손실은 다른 행동의 가치를 적어도 Demonstrator의 행동 가치보다 낮은 마진으로 만든다. 이 손실을 추가하면 보이지 않는 행동의 가치를 합리적인 가치로 끌어 올리며 가치 기능에 의해 유도 된 욕심 많은 정책을 Demonstrator를 모방하게 만듭니다. 알고리즘이이 예비 손실만을 사용하여 사전 훈련 된 경우, 연속 상태와 Q네트워크 사이의 값을 제한하는 것은 TD와 함께 온라인 정책을 개선하는 데 필요한 Bellman 방정식을 충족시키지 못합니다 배우기.
 n-step return (n = 10)을 추가하면 전문가의 궤도 값을 모든 이전 상태로 전파하여 사전 교육을 향상시킬 수 있습니다. n 단계 반환 값은 다음과 같습니다.
 
+```text
 where aE is the action the expert demonstrator took in state s and l(aE,a) is a margin function that is 0 when a = aE and positive otherwise. This loss forces the values of the other actions to be at least a margin lower than the value of the demonstrator’s action. Adding this loss grounds the values of the unseen actions to reasonable values, and makes the greedy policy induced by the value function imitate the demonstrator. If the algorithm pre-trained with only this supervised loss, there would be nothing constraining the values between consecutive states and the Q-network would not satisfy the Bellman equation, which is required to improve the policy on-line with TD learning.
 Adding n-step returns (with n = 10) helps propagate the values of the expert’s trajectory to all the earlier states, leading to better pre-training. The n-step return is:
+```
 
 $$rt + γrt+1 + ... + γn−1rt+n−1 + maxaγnQ(st+n, a),$$
 
 우리는 A3C (Mnih et al. 2016)와 유사하게 전방보기를 사용하여 계산합니다.
 우리는 또한 네트워크의 가중치와 편향에 적용된 L2 정규화 손실을 추가하여 상대적으로 작은 데모 데이터 세트에 과도하게 끼워지는 것을 방지합니다. 네트워크를 업데이트하는 데 사용 된 전체 손실은 네 가지 손실 모두를 합한 것입니다.
 
+```text
 which we calculate using the forward view, similar to A3C (Mnih et al. 2016).
 We also add an L2 regularization loss applied to the weights and biases of the network to help prevent it from over-fitting on the relatively small demonstration dataset. The overall loss used to update the network is a combination of all four losses:
+```
 
 $$J(Q) = JDQ(Q) + λ1Jn(Q) + λ2JE(Q) + λ3JL2(Q).$$
 
@@ -107,9 +122,11 @@ $$J(Q) = JDQ(Q) + λ1Jn(Q) + λ2JE(Q) + λ3JL2(Q).$$
 사전 교육 단계가 완료되면 에이전트가 시스템에서 작동하여 자체 생성 데이터를 수집하고이를 재생 버퍼 Dreplay에 추가합니다. 데이터가 찰 때까지 재생 버퍼에 데이터가 추가 된 후 에이전트는 해당 버퍼의 이전 데이터를 덮어 쓰기 시작합니다. 그러나 에이전트는 데모 데이터를 덮어 쓰지 않습니다. 비례 사전 표본 추출의 경우 에이전트와 데모 전환의 우선 순위에 다른 작은 양의 상수 ǫa와 ǫd가 추가되어 데모 대 에이전트 데이터의 상대적 샘플링을 제어합니다. 두 단계 모두에서 모든 손실이 악마 데이터에 적용되지만 감독 손실은 자체 생성 데이터 (λ2 = 0)에는 적용되지 않습니다.
 전반적으로, DQfD (Deep Q-learning with Demonstration)는 PDD DQN과 6 가지 주요 방법이 다릅니다.
 
+```text
 The λ parameters control the weighting between the losses. We examine removing some of these losses in Section .
 Once the pre-training phase is complete, the agent starts acting on the system, collecting self-generated data, and adding it to its replay buffer Dreplay. Data is added to the replay buffer until it is full, and then the agent starts overwriting old data in that buffer. However, the agent never over-writes the demonstration data. For proportional prioritized sampling, different small positive constants, ǫa and ǫd, are added to the priorities of the agent and demonstration transitions to control the relative sampling of demonstration versus agent data. All the losses are applied to the demonstration data in both phases, while the supervised loss is not applied to self-generated data (λ2 = 0).
 Overall, Deep Q-learning from Demonstration (DQfD) differs from PDD DQN in six key ways:
+```
 
 - 데모 데이터 : DQf 데모
 데이터는 재생 버퍼에 영구히 보관됩니다.
