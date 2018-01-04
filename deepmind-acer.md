@@ -2,7 +2,7 @@
 
 ## Abstract
 
-이 논문은 안정적인 표본 효율을 지니고 있으며, 이산 게임 (57 게임) 아타리 영역과 몇 가지 지속적인 제어 문제를 포함하여 어려운 환경에서 놀랄만큼 잘 수행되는 경험적 재연을 가진 배우 비평가 심층 강화 학습 에이전트를 제시합니다. 이를 달성하기 위해이 백서에서는 바이어스 보정, 확률 적 결투 네트워크 아키텍처 및 새로운 트러스트 영역 정책 최적화 방법을 사용하여 절삭 중요도 샘플링과 같은 몇 가지 혁신을 소개합니다.
+이 논문은 안정적인 표본 효율을 지니고 있으며, 각각의 57 게임에서 아타리 게임들과 몇 가지 Continuous Control Problems를 포함하여 어려운 환경에서 놀랄만큼 잘 수행되는 Experience Replay을 가진 Actor-Critic Deep Reinforcement Learning 에이전트를 제시합니다. 이를 달성하기 위해이 논문에서는 bias 보정, stochastic dueling network architectures 및 새로운 trust region policy optimization method을 사용하여 truncated importance sampling과 같은 몇 가지 혁신을 소개합니다.
 
 ```text
 This paper presents an actor-critic deep reinforcement learning agent with ex- perience replay that is stable, sample efficient, and performs remarkably well on challenging environments, including the discrete 57-game Atari domain and several continuous control problems. To achieve this, the paper introduces several inno- vations, including truncated importance sampling with bias correction, stochastic dueling network architectures, and a new trust region policy optimization method.
@@ -10,29 +10,37 @@ This paper presents an actor-critic deep reinforcement learning agent with ex- p
 
 ## Introduction
 
-에이전트가인지 능력의 큰 레퍼토리를 배우도록 훈련받을 수있는 현실적인 시뮬레이션 환경은 인공 지능의 최근 돌파구의 핵심에있다 (Bellemare et al., 2013, Mnih et al., 2015, Schulman et al., 2015a, Narasimhan et al., 2015; Mnih et al., 2016; Brockman et al., 2016; Oh et al., 2016). 보다 풍부하고 현실적인 환경에서 에이전트의 기능이 향상되고 향상되었습니다. 불행하게도 이러한 진보로 인해 시뮬레이션 비용이 크게 증가했습니다. 특히 에이전트가 환경에 대해 작업 할 때마다 값 비싼 시뮬레이션 단계가 수행됩니다. 따라서 시뮬레이션 비용을 줄이기 위해서는 시뮬레이션 단계 (즉, 환경 샘플)의 수를 줄여야합니다. 에이전트가 실제 환경에 배포 될 때 샘플 효율성에 대한 이러한 요구가 더욱 강력 해졌습니다.
+에이전트가 인지 능력의 큰 레퍼토리를 배우도록 훈련받을 수있는 현실적인 시뮬레이션 환경은 인공 지능의 최근 돌파구의 핵심에있습니다 (Bellemare et al., 2013, Mnih et al., 2015, Schulman et al., 2015a, Narasimhan et al., 2015; Mnih et al., 2016; Brockman et al., 2016; Oh et al., 2016). 보다 풍부하고 현실적인 환경에서 에이전트의 기능이 향상되고 향상되었습니다. 불행하게도 이러한 진보로 인해 시뮬레이션 비용이 크게 증가했습니다. 특히 에이전트가 환경에 대해 작업 할 때마다 값 비싼 시뮬레이션 단계가 수행됩니다. 따라서 시뮬레이션 비용을 줄이기 위해서는 시뮬레이션 단계 (즉, 환경 샘플)의 수를 줄여야합니다. 에이전트가 실제 환경에 배포 될 때 샘플 효율성에 대한 이러한 요구가 더욱 강력 해졌습니다.
 
-Experience replay (Lin, 1992)는 깊은 Q-learning (Mnih et al., 2015; Schaul et al., 2016; Wang 등, 2016; Narasimhan et al., 2015)에서 인기를 얻었는데, 샘플 상관 관계를 줄이는 기술로 Replay는 샘플 효율을 향상시키는 데 실제로 가치있는 도구이며 우리의 실험에서 볼 수 있듯이 최첨단 깊은 Q-learning 방법 (Schaul et al., 2016; Wang et al., 2016) 이 시점에서 아타리에 대한 가장 효율적인 샘플 기법을 큰 차이로 설명합니다. 그러나 두 가지 중요한 한계가 있기 때문에 깊은 Q-learning보다 더 잘 수행해야합니다. 첫째, 최적 정책의 결정 론적 성질은 적 도메인에서의 사용을 제한한다. 둘째, Q 함수와 관련하여 욕심 많은 행동을 찾는 것은 큰 행동 공간에 비용이 많이 든다.
+Experience replay (Lin, 1992)는 Deep Q-learning (Mnih et al., 2015; Schaul et al., 2016; Wang 등, 2016; Narasimhan et al., 2015)에서 인기를 얻었는데, 샘플 상관 관계를 줄이는 기술로 Replay는 샘플 효율을 향상시키는 데 실제로 가치있는 도구이며 우리의 실험에서 볼 수 있듯이 최첨단 Deep Q-learning 방법 (Schaul et al., 2016; Wang et al., 2016) 이 시점에서 아타리에 대한 가장 효율적인 샘플 기법을 큰 차이로 설명합니다. 그러나 두 가지 중요한 한계가 있기 때문에 Deep Q-learning보다 더 잘 수행해야합니다. 첫째, optimal policy의 deterministic 성질은 적 도메인에서의 사용을 제한한다. 둘째, Q 함수와 관련하여 욕심 많은 행동을 찾는 것은 큰 행동 공간에 비용이 많이 든다.
 
-정책 구배 방법은 인공 지능과 로봇 공학에서 중요한 진보의 핵심에 있었다 (Silver et al., 2014; Lillicrap 외 2015; Silver et al., 2016; Levine et al., 2015; Mnih et al., 2016 Schulman et al., 2015a, Heess et al., 2015). 이러한 방법 중 다수는 연속 도메인 또는 Go 재생과 같은 매우 구체적인 작업으로 제한됩니다. Mnih 등의 정책 비동기 우위 주체 평론가 (A3C)와 같이 연속 및 이산 영역 모두에 적용 가능한 기존 변종. (2016)은 샘플 비효율적이다.
+Policy gradient 방법은 인공 지능과 로봇 공학에서 중요한 진보의 핵심에 있었다 (Silver et al., 2014; Lillicrap 외 2015; Silver et al., 2016; Levine et al., 2015; Mnih et al., 2016 Schulman et al., 2015a, Heess et al., 2015). 이러한 방법 중 다수는 연속 도메인 또는 바둑과 같은 매우 구체적인 작업으로 제한됩니다. Mnih et al.의 on-policy asynchronous advantage actor critic (A3C)와 같이 continuous 및 discrete domain 모두에 적용 가능한 기존 변형. (2016) 은 샘플을 사용하는 데 비효율적이다.
+
 연속적이고 이산적인 행동 공간 모두에 적용되는 안정적이고 표본 효율적인 배우 비평 방법의 설계는 오랜 기간 강화 된 보강 학습 (RL)의 장애물이었습니다. 우리는이 보고서가 이러한 도전 과제를 성공적으로 수행 한 첫 번째 사례라고 생각합니다. 좀 더 구체적으로, 우리는 아타리 (Aari)에서 우선 순위가 지정된 재생과 최첨단 Q 네트워크의 최첨단 성능에 거의 부합하는 경험 재생 (ACER)을 가진 배우 평론가를 소개하고 Atari와 Atari 모두에서 샘플 효율성 측면에서 실질적으로 A3C를 능가합니다 연속 제어 도메인.
-ACER는 심 신경 네트워크, 분산 감소 기법, 오프 정책 Retrace 알고리즘 (Munos et al., 2016) 및 RL 에이전트의 병렬 교육 (Mnih et al., 2016)의 최근 발전을 이용합니다. 그러나이 연구의 성공은이 백서에서 제시된 혁신, 즉 편향 보정, 확률 적 결투 네트워크 아키텍처 및 효율적인 신뢰 영역 정책 최적화로 생략 된 중요한 샘플링에 달려 있습니다.
+
+ACER는 딥 뉴럴 네트워크, variance reduction method, the off-policy Retrace algorithm (Munos et al., 2016) 및 parallel training of RL agents (Mnih et al., 2016)의 최근 발전을 이용합니다. 그러나이 연구의 성공은이 논문에서 제시된 혁신, 즉 bias correction, stochastic dueling network architectures 및 efficient trust region policy optimization으로 생략 된 중요한 샘플링에 달려 있습니다.
 
 이론적 인면에서이 논문은 바이어스 보정 기법을 통해 제안 된 절삭 중요성 샘플링에서 Retrace 연산자를 다시 작성할 수 있음을 입증합니다.
 
 ```text
 Realistic simulated environments, where agents can be trained to learn a large repertoire of cognitive skills, are at the core of recent breakthroughs in AI (Bellemare et al., 2013; Mnih et al., 2015; Schulman et al., 2015a; Narasimhan et al., 2015; Mnih et al., 2016; Brockman et al., 2016; Oh et al., 2016). With richer realistic environments, the capabilities of our agents have increased and improved. Unfortunately, these advances have been accompanied by a substantial increase in the cost of simulation. In particular, every time an agent acts upon the environment, an expensive simulation step is conducted. Thus to reduce the cost of simulation, we need to reduce the number of simulation steps (i.e. samples of the environment). This need for sample efficiency is even more compelling when agents are deployed in the real world.
+
 Experience replay (Lin, 1992) has gained popularity in deep Q-learning (Mnih et al., 2015; Schaul et al., 2016; Wang et al., 2016; Narasimhan et al., 2015), where it is often motivated as a technique for reducing sample correlation. Replay is actually a valuable tool for improving sample efficiency and, as we will see in our experiments, state-of-the-art deep Q-learning methods (Schaul et al., 2016; Wang et al., 2016) have been up to this point the most sample efficient techniques on Atari by a significant margin. However, we need to do better than deep Q-learning, because it has two important limitations. First, the deterministic nature of the optimal policy limits its use in adversarial domains. Second, finding the greedy action with respect to the Q function is costly for large action spaces.
+
 Policy gradient methods have been at the heart of significant advances in AI and robotics (Silver et al., 2014; Lillicrap et al., 2015; Silver et al., 2016; Levine et al., 2015; Mnih et al., 2016; Schulman et al., 2015a; Heess et al., 2015). Many of these methods are restricted to continuous domains or to very specific tasks such as playing Go. The existing variants applicable to both continuous and discrete domains, such as the on-policy asynchronous advantage actor critic (A3C) of Mnih et al. (2016), are sample inefficient.
+
 The design of stable, sample efficient actor critic methods that apply to both continuous and discrete action spaces has been a long-standing hurdle of reinforcement learning (RL). We believe this paper is the first to address this challenge successfully at scale. More specifically, we introduce an actor critic with experience replay (ACER) that nearly matches the state-of-the-art performance of deep Q-networks with prioritized replay on Atari, and substantially outperforms A3C in terms of sample efficiency on both Atari and continuous control domains.
+
 ACER capitalizes on recent advances in deep neural networks, variance reduction techniques, the off-policy Retrace algorithm (Munos et al., 2016) and parallel training of RL agents (Mnih et al., 2016). Yet, crucially, its success hinges on innovations advanced in this paper: truncated importance sampling with bias correction, stochastic dueling network architectures, and efficient trust region policy optimization.
+
 On the theoretical front, the paper proves that the Retrace operator can be rewritten from our proposed truncated importance sampling with bias correction technique.
 ```
 
 ## 2 BACKGROUND AND PROBLEM SETUP
 
-이산 시간 단계에 걸쳐 환경과 상호 작용하는 에이전트를 고려하십시오. 에이전트는 시간 단계 t에서 nx 차원 상태 벡터 xt ∈ X ⊆ Rnx를 관찰하고, 정책 π (a | xt)에 따라 행동을 선택하고 환경에 의해 생성 된 보상 신호 rt ∈ R을 관찰한다. 우리는 ∈ {1, 2,. . . , Na}, 제 5 절에서 ∈ A ⊆ Rna에 대한 연속적인 연 관들로 구성된다.
-에이전트의 목표는 기대 수익률 Rt = i≥0 γirt + i를 극대화하는 것입니다. 할인 계수 γ ∈ [0,1]은 즉각적이고 미래의 보상의 중요성을 상쇄시킨다. 정책 π를 따르는 에이전트의 경우 상태 작업 및 상태 값만 기능의 표준 정의를 사용합니다.
+이산 시간 단계에 걸쳐 환경과 상호 작용하는 에이전트를 고려하십시오. 에이전트는 시간 단계 t에서 $nx$ 차원 상태 벡터 $x_t Rnx$를 관찰하고, 정책 $π (a | xt)$에 따라 행동을 선택하고 환경에 의해 생성 된 보상 신호 rt ∈ R을 관찰한다. 우리는 ${1, 2,. . . , Na}$, 제 5 절에서 ∈ A ⊆ Rna에 대한 연속적인 연 관들로 구성된다.
+
+에이전트의 목표는 기대 수익률 $Rt = i0 γirt + i$를 극대화하는 것입니다. 할인 계수 $γ  [0,1]$은 즉각적이고 미래의 보상의 중요성을 상쇄시킨다. 정책 π를 따르는 에이전트의 경우 상태 작업 및 상태 값만 기능의 표준 정의를 사용합니다.
 [Rt | xt, at]와 Vπ (xt) = Eat [Qt (xt, at) | xt]에서 Qt (xt, at) = Ext + 1 : ∞이다. 여기서, 기대는 관찰 된 환경 상태 xt와 생성 된 동작에 관한 것이다.
 xt + 1 : ∞는 시간 t + 1에서 시작되는 상태 궤적을 나타낸다.
 또한 우위 함수 Aπ (xt, at) = Qπ (xt, at) - Vπ (xt)를 정의 할 필요가있다.
