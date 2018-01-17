@@ -2,7 +2,7 @@
 
 ## Abstract
 
-이 논문은 안정적인 표본 효율을 지니고 있으며, 각각의 57 게임에서 아타리 게임들과 몇 가지 Continuous Control Problems를 포함하여 어려운 환경에서 놀랄만큼 잘 수행되는 Experience Replay을 가진 Actor-Critic Deep Reinforcement Learning 에이전트를 제시합니다. 이를 달성하기 위해이 논문에서는 bias 보정, stochastic dueling network architectures 및 새로운 trust region policy optimization method을 사용하여 truncated importance sampling과 같은 몇 가지 혁신을 소개합니다.
+이 논문은 안정적인 표본 효율을 지니고 있으며, 각각의 57 게임에서 아타리 게임들과 몇 가지 Continuous Control Problems를 포함하여 어려운 환경에서 놀랄만큼 잘 수행되는 Experience Replay을 가진 Actor-Critic Deep Reinforcement Learning 에이전트를 제시합니다. 이를 달성하기 위해이 논문에서는 bias correction, stochastic dueling network architectures 및 새로운 trust region policy optimization(TRPO) method을 사용하여 truncated importance sampling과 같은 몇 가지 혁신을 소개합니다.
 
 ```text
 This paper presents an actor-critic deep reinforcement learning agent with ex- perience replay that is stable, sample efficient, and performs remarkably well on challenging environments, including the discrete 57-game Atari domain and several continuous control problems. To achieve this, the paper introduces several inno- vations, including truncated importance sampling with bias correction, stochastic dueling network architectures, and a new trust region policy optimization method.
@@ -16,7 +16,7 @@ Experience replay (Lin, 1992)는 Deep Q-learning (Mnih et al., 2015; Schaul et a
 
 Policy gradient 방법은 인공 지능과 로봇 공학에서 중요한 진보의 핵심에 있었다 (Silver et al., 2014; Lillicrap 외 2015; Silver et al., 2016; Levine et al., 2015; Mnih et al., 2016 Schulman et al., 2015a, Heess et al., 2015). 이러한 방법 중 다수는 연속 도메인 또는 바둑과 같은 매우 구체적인 작업으로 제한됩니다. Mnih et al.의 on-policy asynchronous advantage actor critic (A3C)와 같이 continuous 및 discrete domain 모두에 적용 가능한 기존 변형. (2016) 은 샘플을 사용하는 데 비효율적이다.
 
-연속적이고 이산적인 행동 공간 모두에 적용되는 안정적이고 표본 효율적인 배우 비평 방법의 설계는 오랜 기간 강화 된 보강 학습 (RL)의 장애물이었습니다. 우리는이 보고서가 이러한 도전 과제를 성공적으로 수행 한 첫 번째 사례라고 생각합니다. 좀 더 구체적으로, 우리는 아타리 (Aari)에서 우선 순위가 지정된 재생과 최첨단 Q 네트워크의 최첨단 성능에 거의 부합하는 경험 재생 (ACER)을 가진 배우 평론가를 소개하고 Atari와 Atari 모두에서 샘플 효율성 측면에서 실질적으로 A3C를 능가합니다 연속 제어 도메인.
+연속적이고 이산적인 행동 공간 모두에 적용되는 안정적이고 sample efficient한 actor critic method의 설계는 오랜 기간 Reinforcement Learning (RL)의 장애물이었습니다. 우리는이 논문이 이러한 도전 과제를 성공적으로 수행 한 첫 번째 사례라고 생각합니다. 좀 더 구체적으로, 우리는 아타리 (Aari)에서 우선 순위가 지정된 재생과 최첨단 Q 네트워크의 최첨단 성능에 거의 부합하는 경험 재생 (ACER)을 가진 배우 평론가를 소개하고 Atari와 Atari 모두에서 샘플 효율성 측면에서 실질적으로 A3C를 능가합니다 연속 제어 도메인.
 
 ACER는 딥 뉴럴 네트워크, variance reduction method, the off-policy Retrace algorithm (Munos et al., 2016) 및 parallel training of RL agents (Mnih et al., 2016)의 최근 발전을 이용합니다. 그러나이 연구의 성공은이 논문에서 제시된 혁신, 즉 bias correction, stochastic dueling network architectures 및 efficient trust region policy optimization으로 생략 된 중요한 샘플링에 달려 있습니다.
 
@@ -38,7 +38,7 @@ On the theoretical front, the paper proves that the Retrace operator can be rewr
 
 ## 2 BACKGROUND AND PROBLEM SETUP
 
-이산 시간 단계에 걸쳐 환경과 상호 작용하는 에이전트를 고려하십시오. 에이전트는 시간 단계 t에서 $nx$ 차원 상태 벡터 $x_t Rnx$를 관찰하고, 정책 $π (a | xt)$에 따라 행동을 선택하고 환경에 의해 생성 된 보상 신호 rt ∈ R을 관찰한다. 우리는 ${1, 2,. . . , Na}$, 제 5 절에서 ∈ A ⊆ Rna에 대한 연속적인 연 관들로 구성된다.
+이산 시간 단계에 걸쳐 환경과 상호 작용하는 에이전트를 고려하십시오. 에이전트는 시간 단계 t에서 $nx$ 차원 상태 벡터 $x_t Rnx$를 관찰하고, 정책 $\pi(a | x_t)$에 따라 행동을 선택하고 환경에 의해 생성 된 보상 신호 rt ∈ R을 관찰한다. 우리는 ${1, 2,. . . , Na}$, 제 5 절에서 ∈ A ⊆ Rna에 대한 연속적인 연 관들로 구성된다.
 
 에이전트의 목표는 기대 수익률 $Rt = i0 γirt + i$를 극대화하는 것입니다. 할인 계수 $γ  [0,1]$은 즉각적이고 미래의 보상의 중요성을 상쇄시킨다. 정책 π를 따르는 에이전트의 경우 상태 작업 및 상태 값만 기능의 표준 정의를 사용합니다.
 [Rt | xt, at]와 Vπ (xt) = Eat [Qt (xt, at) | xt]에서 Qt (xt, at) = Ext + 1 : ∞이다. 여기서, 기대는 관찰 된 환경 상태 xt와 생성 된 동작에 관한 것이다.
@@ -85,7 +85,7 @@ network.) Our neural networks, though building on the networks used in A3C, will
 
 ## 3 DISCRETE ACTOR CRITIC WITH EXPERIENCE REPLAY
 
-경험 재생을 통한 정책 외 학습은 배우 - 비평가의 표본 효율성을 향상시키는 확실한 전략으로 보입니다. 그러나 오프 정책 견적서의 분산과 안정성을 통제하는 것은 매우 어렵습니다. 중요도 표본 추출은 정책 외 학습을위한 가장 보편적 인 접근 방법 중 하나이다 (Meuleau et al., 2000; Jie & Abbeel, 2010; Levine & Koltun, 2013). 우리의 맥락에서, 그것은 다음과 같이 진행된다. 우리가 행동 정책 μ에 따라 샘플링 된 궤적 {x0, a0, r0, μ (· | x0), ..., xk, ak, rk, μ (· | xk) 우리의 경험을 기억하십시오. 그런 다음 중요도 가중치 정책 기울기는 다음과 같이 표시됩니다.
+Experience Replay을 통한 Policy외 학습은 Actor-Critic의 Sample Efficiency을 향상시키는 확실한 전략으로 보입니다. 그러나 Off-Policy Estimator의 Variance과 Stability를 통제하는 것은 매우 어렵습니다. Importance sampling은 정책 외 학습을위한 가장 보편적 인 접근 방법 중 하나이다 (Meuleau et al., 2000; Jie & Abbeel, 2010; Levine & Koltun, 2013). 우리의 맥락에서, 그것은 다음과 같이 진행된다. 우리가 행동 정책 μ에 따라 샘플링 된 궤적 {x0, a0, r0, μ (· | x0), ..., xk, ak, rk, μ (· | xk) 우리의 경험을 기억하십시오. 그런 다음 중요도 가중치 정책 기울기는 다음과 같이 표시됩니다.
 
 여기서 ρt = π (at | xt)는 중요도 가중치를 나타냅니다. 이 추정기는 편향되지 않지만,
  μ (at | xt)
